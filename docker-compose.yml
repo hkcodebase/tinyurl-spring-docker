@@ -14,6 +14,13 @@ services:
       retries: 5
     volumes:
       - cassandra_data:/var/lib/cassandra
-
+  cassandra-load-keyspace:
+    image: cassandra:latest
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    volumes:
+        - ./api/src/main/resources/scripts/tinyurl-data.cql:/tinyurl-data.cql
+    command: /bin/bash -c "echo 'Loading data...'; cqlsh cassandra -f /tinyurl-data.cql"
 volumes:
   cassandra_data:

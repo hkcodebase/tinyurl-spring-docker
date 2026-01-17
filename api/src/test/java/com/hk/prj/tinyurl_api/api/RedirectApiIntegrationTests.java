@@ -1,6 +1,7 @@
 package com.hk.prj.tinyurl_api.api;
 
-import com.hk.prj.tinyurl_api.service.ShortCodeService;
+import com.hk.prj.tinyurl_api.model.Url;
+import com.hk.prj.tinyurl_api.service.UrlService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,10 +25,11 @@ public class RedirectApiIntegrationTests {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ShortCodeService shortCodeService;
+    private UrlService urlService;
 
     @Test
     public void whenRedirect_thenStatusIs404() throws Exception {
+        when(urlService.getUrl("abc123")).thenReturn(new Url());
         this.mockMvc.perform(MockMvcRequestBuilders.get(redirectPath))
                 .andExpect(status().isNotFound());
     }
@@ -35,7 +37,7 @@ public class RedirectApiIntegrationTests {
     @Test
     public void whenRedirect_thenStatusIs200() throws Exception {
         String originalUrl = "https://hemantkumar.dev";
-        when(shortCodeService.getUrl("abc123")).thenReturn(originalUrl);
+        when(urlService.getUrl("abc123")).thenReturn(new Url(originalUrl, "abc123", null));
 
         this.mockMvc.perform(MockMvcRequestBuilders.get(redirectPath))
                 .andExpect(status().isFound())

@@ -26,7 +26,7 @@ public class GenerateApiImpl implements GenerateApiDelegate {
     @Override
     public ResponseEntity<GenerateShortUrl200Response> generateShortUrl(GenerateShortUrlRequest generateShortUrlRequest) {
         GenerateShortUrl200Response generateShortUrl200Response = new GenerateShortUrl200Response();
-        String code = urlService.validateAndSave(generateShortUrlRequest.getOriginalUrl());
+        String code = urlService.validateAndSave(generateShortUrlRequest.getOriginalUrl(), generateShortUrlRequest.getAlias());
         URI uri =  ServletUriComponentsBuilder
                 .fromCurrentContextPath().path("/redirect/{code}")
                 .encode().buildAndExpand(code).toUri();

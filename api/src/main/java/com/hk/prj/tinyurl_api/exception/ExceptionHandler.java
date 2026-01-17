@@ -10,5 +10,12 @@ public class ExceptionHandler {
     public ResponseEntity<String> handle404(){
         return ResponseEntity.notFound().build();
     }
+
+    @org.springframework.web.bind.annotation.ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<String> handleException(Exception ex){
+        return ResponseEntity.badRequest().body(ex.getMessage());
+    }
+
+
 }
 

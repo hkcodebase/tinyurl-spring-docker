@@ -41,4 +41,43 @@ public class GenerateApiIntegrationTests {
                 .andExpect(status().is2xxSuccessful());
     }
 
+    @Test
+    public void whenGenerateByAlias_thenStatusIs200() throws Exception {
+        GenerateShortUrlRequest generateShortUrlRequest = new GenerateShortUrlRequest();
+        generateShortUrlRequest.setOriginalUrl(URI.create("https://somesampleurl.com"));
+        generateShortUrlRequest.setAlias("abc12345");
+
+        GenerateShortUrl200Response generateShortUrl200Response = new GenerateShortUrl200Response();
+        generateShortUrl200Response.setShortenedUrl(URI.create("http://localhost:8080/api/v1/abc12345"));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(generatePath)
+                        .content(objectMapper.writeValueAsString(generateShortUrlRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+    }
+
+    @Test
+    public void whenGenerateByAlias2Times_thenStatusIs400() throws Exception {
+        GenerateShortUrlRequest generateShortUrlRequest = new GenerateShortUrlRequest();
+        generateShortUrlRequest.setOriginalUrl(URI.create("https://somesampleurl.com"));
+        generateShortUrlRequest.setAlias("abc1234");
+
+        GenerateShortUrl200Response generateShortUrl200Response = new GenerateShortUrl200Response();
+        generateShortUrl200Response.setShortenedUrl(URI.create("http://localhost:8080/api/v1/abc1234"));
+
+        ObjectMapper objectMapper = new ObjectMapper();
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(generatePath)
+                        .content(objectMapper.writeValueAsString(generateShortUrlRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is2xxSuccessful());
+
+        this.mockMvc.perform(MockMvcRequestBuilders.post(generatePath)
+                        .content(objectMapper.writeValueAsString(generateShortUrlRequest))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().is4xxClientError());
+    }
+
 }

@@ -1,13 +1,12 @@
 package com.hk.prj.tinyurl_api.service;
 
-import com.hk.prj.tinyurl_api.exception.ResourceNotFoundException;
 import com.hk.prj.tinyurl_api.model.Url;
 import com.hk.prj.tinyurl_api.repository.UrlRepository;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 import org.apache.commons.lang3.RandomStringUtils;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.net.URI;
 import java.time.LocalDateTime;
@@ -44,7 +43,15 @@ public class UrlService {
         return code;
     }
 
-    public String validateAndSave(@NotNull @Valid URI originalUrl) {
+    public String validateAndSave(@NotNull @Valid URI originalUrl, String alias) {
+        if(StringUtils.hasLength(alias)){
+            if(urlRepository.existsById(alias))
+                throw new IllegalArgumentException("alias already exists");
+
+            Url url = new Url(originalUrl.toString(), alias, LocalDateTime.now());
+            urlRepository.save(url);
+            return alias;
+        }
         return save(originalUrl.toString());
     }
 }
