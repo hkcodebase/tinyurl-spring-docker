@@ -1,31 +1,31 @@
 package com.hk.prj.tinyurl_api.api;
 
-import com.hk.prj.tinyurl_api.ShortCodeService;
+import com.hk.prj.tinyurl_api.exception.ResourceNotFoundException;
 import com.hk.prj.tinyurl_api.openapi.api.RedirectApiDelegate;
+import com.hk.prj.tinyurl_api.service.UrlService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 
 @Component
 public class RedirectApiImpl implements RedirectApiDelegate {
 
-    private final ShortCodeService shortCodeService;
+    private final UrlService urlService;
 
-    public RedirectApiImpl(ShortCodeService shortCodeService) {
-        this.shortCodeService = shortCodeService;
+    public RedirectApiImpl(UrlService urlService) {
+        this.urlService = urlService;
     }
 
     @Override
     public ResponseEntity<Void> redirectToOriginalUrl(String shortCode) {
-        String originalUrl = shortCodeService.getUrl(shortCode);
+        String originalUrl = urlService.getUrl(shortCode).getOriginalUrl();
         if(StringUtils.isEmpty(originalUrl))
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            throw new ResourceNotFoundException("this url not found");
 
-        MultiValueMap<String, String> headers =  new LinkedMultiValueMap<>();
-        headers.add("Location", shortCodeService.getUrl(shortCode));
+        HttpHeaders headers =  new HttpHeaders();
+        headers.add("Location", originalUrl);
         return new ResponseEntity<>(headers, HttpStatus.FOUND);
     }
 

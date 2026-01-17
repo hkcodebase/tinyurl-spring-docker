@@ -1,4 +1,4 @@
-package com.hk.prj.tinyurl_api;
+package com.hk.prj.tinyurl_api.service;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;

@@ -86,13 +86,23 @@ https://www.baeldung.com/java-openapi-generator-server
 
 
 
-## Cassandra in local via docker 
+## Cassandra in local 
+### Using docker 
 - docker pull cassandra:latest
 - docker network create cassandra-net
 - docker run --rm -d --name cassandra --hostname cassandra --network cassandra-net -p 9042:9042 cassandra
 
-## connect to cassandra via intellij
+### Using docker-compose
+-  Run this command in project root folder `docker compose up -d`
+
+### Connect to cassandra using intellij
 ![](cassandra-intellij.png)
+
+### Connect to cassandra using cqlsh
+- Run command in terminal `docker exec -it cassandra cqlsh`
+
+### verify 
+- Verify in browser - http://localhost:8080/api/v1/redirect/123456
 
 ## install docker-desktop
 https://docs.docker.com/desktop/setup/install/windows-install/
