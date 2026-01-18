@@ -1,4 +1,19 @@
 services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: tinyurl-api
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_CASSANDRA_CONTACT_POINTS=cassandra
+      - SPRING_CASSANDRA_PORT=9042
+      - SPRING_CASSANDRA_LOCAL_DATACENTER=datacenter1
+      - SPRING_CASSANDRA_KEYSPACE_NAME=tinyurl
+    depends_on:
+      cassandra:
+        condition: service_healthy
   cassandra:
     image: cassandra:latest
     container_name: cassandra
