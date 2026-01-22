@@ -102,9 +102,11 @@ https://www.baeldung.com/java-openapi-generator-server
 ### Connect to cassandra using cqlsh
 - Run command in terminal `docker exec -it cassandra cqlsh`
 
-### Verify in browser - http://localhost:8080/api/v1/redirect/123456
-
-### Verify using curl - curl -i http://localhost:8080/api/v1/redirect/123456
+### Verify in browser 
+- http://localhost:8080/api/v1/redirect/123456
+- http://localhost:8080/api/v1/swagger-ui/index.html
+### Verify using curl 
+ - curl -i `http://localhost:8080/api/v1/swagger-ui/index.html`
 
 ## install docker-desktop
 https://docs.docker.com/desktop/setup/install/windows-install/
