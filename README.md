@@ -81,11 +81,6 @@ and This dependency
     </dependency>
 ```
 
-## References
-https://www.baeldung.com/java-openapi-generator-server
-
-
-
 ## Cassandra in local 
 ### Using docker 
 - docker pull cassandra:latest
@@ -102,15 +97,24 @@ https://www.baeldung.com/java-openapi-generator-server
 ### Connect to cassandra using cqlsh
 - Run command in terminal `docker exec -it cassandra cqlsh`
 
-### Verify in browser 
-- http://localhost:8080/api/v1/redirect/123456
-- http://localhost:8080/api/v1/swagger-ui/index.html
-### Verify using curl 
- - curl -i `http://localhost:8080/api/v1/swagger-ui/index.html`
+### Verify if started using maven
+- In browser - http://localhost:8080/api/v1/redirect/123456  
+- In browser - http://localhost:8080/api/v1/swagger-ui/index.html
+- curl -i `http://localhost:8080/api/v1/swagger-ui/index.html`
 
-## install docker-desktop
+### Verify if started using docker composer
+- In browser - http://localhost/api/v1/redirect/123456
+- In browser - http://localhost/api/v1/swagger-ui/index.html
+- curl -i `http://localhost/api/v1/swagger-ui/index.html`
+
+### References
+** Install Docker Desktop
 https://docs.docker.com/desktop/setup/install/windows-install/
 
+** OpenApi Generator Article
+https://www.baeldung.com/java-openapi-generator-server
+
+** Docker Desktop Issue in windows 
 WSL is required to run docker-desktop in windows.
 if you get this error with WSL - “Error code: Wsl/CallMsi/REGDB_E_CLASSNOTREG”
 Then use this link for WSL - https://github.com/microsoft/WSL/releases/ 
