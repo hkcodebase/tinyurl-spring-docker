@@ -1,120 +1,177 @@
-## Tinyurl Backend
-Goal of this application is to demonstrate a working backend api with capabilities 
-Also, dependency and configuration of each below capabilities
-- openapi spec (auto generation of api spec .yml file)
-- actuator
-- security (api key)
+# Tinyurl Backend (tinyurl-api)
 
-## Project Generate Via Springboot Starter 
+A Spring Boot backend API that demonstrates a working “tiny URL” service, along with common production-ready capabilities such as OpenAPI/Swagger docs and Actuator. The service stores URL mappings in Cassandra.
+
+---
+
+## Contents
+
+- [Features](#features)
+- [Tech stack](#tech-stack)
+- [Project generation](#project-generation)
+- [Prerequisites](#prerequisites)
+- [Run locally (Maven)](#run-locally-maven)
+- [Run with Docker Compose](#run-with-docker-compose)
+- [Endpoints to verify](#endpoints-to-verify)
+- [API documentation (Swagger / OpenAPI)](#api-documentation-swagger--openapi)
+- [Actuator](#actuator)
+- [OpenAPI stub generation](#openapi-stub-generation)
+- [Cassandra Via docker](#cassandra-via-docker-)
+- [Cassandra Connect with IntelliJ](#connect-with-intellij)
+- [Cassandra Connect with cqlsh](#connect-with-cqlsh)
+- [References](#references)
+
+---
+
+## Features
+
+- **OpenAPI spec & Swagger UI**
+  - Auto-generation support for API interfaces from an `openapi.yml`
+- **Actuator** for health/metrics-style endpoints
+- **Cassandra** persistence (local via Docker / Docker Compose)
+- Short-code generation (6-digit) using Apache Commons Lang
+
+---
+
+## Tech stack
+
+- Java + Spring Boot (Spring MVC)
+- Maven
+- Cassandra
+- Docker / Docker Compose
+
+---
+
+## Project generation
+
+This project was initially generated via Spring Initializr:
+
 - https://start.spring.io/#!type=maven-project&language=java&platformVersion=3.5.5&packaging=jar&jvmVersion=24&groupId=com.hk.prj&artifactId=tinyurl-api&name=tinyurl-api&description=Project%20to%20serve%20as%20tinyurl%20backend&packageName=com.hk.prj.tinyurl-api&dependencies=web
 
-## All Modifications in [pom.xml](pom.xml)
+---
 
-- Actuator Dependency to enable actuator at link - <basepath>/<context-path>/actuator
+## Prerequisites
 
-```xml
-    <dependency>
-        <groupId>org.springframework.boot</groupId>
-        <artifactId>spring-boot-starter-actuator</artifactId>
-    </dependency>
-```
- - in this app - http://localhost:8080/api/v1/actuator
+- Java 21
+- Maven
+- Docker Desktop (for Cassandra locally)
 
-- Swagger Dependency - <basepath>/<context-path>/swagger-ui.html
+---
 
-```xml
-    <dependency>
-        <groupId>org.springdoc</groupId>
-        <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-    </dependency>
+## Run locally (Maven)
 
-```
- - in this app - http://localhost:8080/api/v1/swagger-ui/index.html
+1. Start Cassandra (see [Cassandra (local)](#cassandra-local))
+2. Build & run:
+   ```bash
+   mvn clean spring-boot:run
+   ```
 
-- [openapi.yml](src/main/resources/openapi.yml) to generate autostub of all API interfaces 
-```xml
-<plugin>
-                <groupId>org.openapitools</groupId>
-                <artifactId>openapi-generator-maven-plugin</artifactId>
-                <version>7.8.0</version>
-                <executions>
-                    <execution>
-                        <goals>
-                            <goal>generate</goal>
-                        </goals>
-                        <configuration>
-                            <inputSpec>
-                                ${project.basedir}/src/main/resources/openapi.yml
-                            </inputSpec>
-                            <generatorName>spring</generatorName>
-                            <apiPackage>openapi.api</apiPackage>
-                            <modelPackage>openapi.model</modelPackage>
-                            <supportingFilesToGenerate>
-                                ApiUtil.java
-                            </supportingFilesToGenerate>
-                            <configOptions>
-                                <delegatePattern>true</delegatePattern>
-                                <useSpringBoot3>true</useSpringBoot3>
-                            </configOptions>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
+---
+
+## Run with Docker Compose
+
+From the project root:
+```bash
+docker compose up -d
 ```
 
-and This dependency 
-
-```xml
-    <dependency>
-        <groupId>org.openapitools</groupId>
-        <artifactId>jackson-databind-nullable</artifactId>
-        <version>0.2.1</version>
-    </dependency>
+Stop:
+```bash
+docker compose down
 ```
 
-## Apache Commons Dependency to Generate Random 6 digit short code for a URL
-```xml
-    <dependency>
-        <groupId>org.apache.commons</groupId>
-        <artifactId>commons-lang3</artifactId>
-        <version>3.18.0</version>
-    </dependency>
+---
+
+## Endpoints to verify
+
+### When started via Maven (local Spring Boot)
+
+- Redirect example:
+  - `http://localhost:8080/api/v1/redirect/123456`
+- Swagger UI:
+  - `http://localhost:8080/api/v1/swagger-ui/index.html`
+
+### When started via Docker Compose
+
+- Redirect example:
+  - `http://localhost/api/v1/redirect/123456`
+- Swagger UI:
+  - `http://localhost/api/v1/swagger-ui/index.html`
+
+Example curl: `curl -i 'http://localhost:8080/api/v1/redirect/123456'`
+
+> Note - Use the port 80 if running via Docker Compose
+
+---
+
+## API documentation (Swagger / OpenAPI)
+
+Swagger UI is available at:
+
+- `<basepath>/<context-path>/swagger-ui/index.html`
+
+In this app (local Maven run):
+
+- `http://localhost:8080/api/v1/swagger-ui/index.html`
+
+---
+
+## Actuator
+
+Actuator is available at:
+
+- `<basepath>/<context-path>/actuator`
+
+In this app (local Maven run):
+
+- `http://localhost:8080/api/v1/actuator`
+
+---
+
+## OpenAPI stub generation
+
+The OpenAPI source file:
+
+- [`src/main/resources/openapi.yml`](src/main/resources/openapi.yml)
+
+The project uses the OpenAPI Generator Maven plugin (see [`pom.xml`](pom.xml)) to generate Spring interfaces/models from the spec.
+
+Related dependency (see `pom.xml`):
+
+- `org.openapitools:jackson-databind-nullable`
+---
+
+## Cassandra via docker 
+> Note - when running this project via maven command
+
+Start:
+```bash
+ docker pull cassandra:latest docker network create cassandra-net docker run --rm -d --name cassandra --hostname cassandra --network cassandra-net -p 9042:9042 cassandra
 ```
 
-## Cassandra in local 
-### Using docker 
-- docker pull cassandra:latest
-- docker network create cassandra-net
-- docker run --rm -d --name cassandra --hostname cassandra --network cassandra-net -p 9042:9042 cassandra
-- stop docker container using `docker stop cassandra`
-### Using docker-compose
--  Run this command in project root folder `docker compose up -d`
--  stop docker container using `docker compose down`
+Stop:
+```bash
+docker stop cassandra
+```
 
-### Connect to cassandra using intellij
-![](cassandra-intellij.png)
+## Connect with IntelliJ
 
-### Connect to cassandra using cqlsh
-- Run command in terminal `docker exec -it cassandra cqlsh`
+See: `cassandra-intellij.png`
 
-### Verify if started using maven
-- In browser - http://localhost:8080/api/v1/redirect/123456  
-- In browser - http://localhost:8080/api/v1/swagger-ui/index.html
-- curl -i `http://localhost:8080/api/v1/swagger-ui/index.html`
+## Connect with cqlsh
+```bash
+docker exec -it cassandra cqlsh
+```
 
-### Verify if started using docker composer
-- In browser - http://localhost/api/v1/redirect/123456
-- In browser - http://localhost/api/v1/swagger-ui/index.html
-- curl -i `http://localhost/api/v1/swagger-ui/index.html`
 
-### References
-** Install Docker Desktop
-https://docs.docker.com/desktop/setup/install/windows-install/
+---
 
-** OpenApi Generator Article
-https://www.baeldung.com/java-openapi-generator-server
+## References
 
-** Docker Desktop Issue in windows 
-WSL is required to run docker-desktop in windows.
-if you get this error with WSL - “Error code: Wsl/CallMsi/REGDB_E_CLASSNOTREG”
-Then use this link for WSL - https://github.com/microsoft/WSL/releases/ 
+- Install Docker Desktop:
+    - https://docs.docker.com/desktop/setup/install/windows-install/
+- OpenAPI Generator article:
+    - https://www.baeldung.com/java-openapi-generator-server
+- Docker Desktop issue on Windows (WSL required):
+    - If you see: `Error code: Wsl/CallMsi/REGDB_E_CLASSNOTREG`
+    - WSL releases: https://github.com/microsoft/WSL/releases/

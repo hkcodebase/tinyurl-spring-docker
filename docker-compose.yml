@@ -6,6 +6,8 @@ services:
     container_name: tinyurl-api
     ports:
       - "80:8080"
+    networks:
+      - tinyurl-net
     environment:
       - SPRING_CASSANDRA_CONTACT_POINTS=cassandra
       - SPRING_CASSANDRA_PORT=9042
@@ -14,28 +16,48 @@ services:
     depends_on:
       cassandra:
         condition: service_healthy
+
   cassandra:
-    image: cassandra:latest
+    image: cassandra:5.0 # Best to pin a specific version instead of 'latest'
     container_name: cassandra
     ports:
       - "9042:9042"
+    networks:
+      - tinyurl-net
     environment:
       - CASSANDRA_DC=datacenter1
       - CASSANDRA_CLUSTER_NAME=tinyurl-cluster
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
     healthcheck:
-      test: ["CMD-SHELL", "nodetool status"]
-      interval: 30s
+      # We point to 127.0.0.1 explicitly and use a simpler command
+      test: [ "CMD-SHELL", "cqlsh 127.0.0.1 -e 'describe cluster'" ]
+      interval: 30s    # Give it more time between attempts
       timeout: 10s
-      retries: 5
+      retries: 10      # Increase retries to allow for slow startup (up to 5 mins total)
+      start_period: 60s # NEW: Tells Docker to ignore failures for the first 60 seconds
     volumes:
       - cassandra_data:/var/lib/cassandra
+
   cassandra-load-keyspace:
-    image: cassandra:latest
+    image: cassandra:5.0
+    networks:
+      - tinyurl-net
     depends_on:
       cassandra:
         condition: service_healthy
     volumes:
-        - ./api/src/main/resources/scripts/tinyurl-data.cql:/tinyurl-data.cql
-    command: /bin/bash -c "echo 'Loading data...'; cqlsh cassandra -f /tinyurl-data.cql"
+      - ./api/src/main/resources/scripts/tinyurl-data.cql:/tinyurl-data.cql
+    # Added a small sleep to ensure the transport layer is fully up
+    command: /bin/bash -c "sleep 30 && cqlsh cassandra -f /tinyurl-data.cql"
+
+networks:
+  tinyurl-net:
+    driver: bridge
+
 volumes:
   cassandra_data:
