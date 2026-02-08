@@ -60,7 +60,7 @@ This project was initially generated via Spring Initializr:
 
 ## Run locally (Maven)
 
-1. Start Cassandra (see [Cassandra (local)](#cassandra-local))
+1. Start Cassandra (see [Cassandra via Docker](#cassandra-via-docker-))
 2. Build & run:
    ```bash
    mvn clean spring-boot:run
@@ -132,9 +132,9 @@ In this app (local Maven run):
 
 The OpenAPI source file:
 
-- [`src/main/resources/openapi.yml`](src/main/resources/openapi.yml)
+- [`src/main/resources/openapi.yml`](api/src/main/resources/openapi.yml)
 
-The project uses the OpenAPI Generator Maven plugin (see [`pom.xml`](pom.xml)) to generate Spring interfaces/models from the spec.
+The project uses the OpenAPI Generator Maven plugin (see [`pom.xml`](api/pom.xml)) to generate Spring interfaces/models from the spec.
 
 Related dependency (see `pom.xml`):
 
