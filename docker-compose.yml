@@ -1,0 +1,51 @@
+services:
+  api:
+    build:
+      context: ./api
+      dockerfile: Dockerfile
+    container_name: tinyurl-api
+    ports:
+      - "80:8080"
+    networks:
+      - tinyurl-net
+    environment:
+      - SPRING_CASSANDRA_CONTACT_POINTS=cassandra
+      - SPRING_CASSANDRA_PORT=9042
+      - SPRING_CASSANDRA_LOCAL_DATACENTER=datacenter1
+      - SPRING_CASSANDRA_KEYSPACE_NAME=tinyurl
+    depends_on:
+      cassandra:
+        condition: service_healthy
+    restart: unless-stopped
+
+  cassandra:
+    image: cassandra:5.0
+    container_name: cassandra
+    ports:
+      - "9042:9042"
+    networks:
+      - tinyurl-net
+    environment:
+      - CASSANDRA_DC=datacenter1
+      - CASSANDRA_CLUSTER_NAME=tinyurl-cluster
+      - MAX_HEAP_SIZE=512M
+      - HEAP_NEWSIZE=100M
+    deploy:
+      resources:
+        limits:
+          memory: 1G
+    healthcheck:
+      test: [ "CMD-SHELL", "cqlsh -e 'DESCRIBE KEYSPACE tinyurl' || exit 1" ]
+      interval: 10s
+      timeout: 10s
+      retries: 20
+      start_period: 60s
+    volumes:
+      - cassandra_data:/var/lib/cassandra
+      - ./api/src/main/resources/scripts/tinyurl-data.cql:/docker-entrypoint-initdb.d/init.cql
+networks:
+  tinyurl-net:
+    driver: bridge
+
+volumes:
+  cassandra_data:
