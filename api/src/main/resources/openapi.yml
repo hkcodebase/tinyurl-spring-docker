@@ -1,0 +1,143 @@
+openapi: 3.0.3
+info:
+  title: tinyurl-guru backend Service API
+  description: An API for creating shortened URLs.
+  version: 1.0.0
+servers:
+  - url: 'http://localhost:8080'
+    description: APIs
+paths:
+  /ping:
+    get:
+      summary: Health check
+      description: Returns a 200 OK to indicate the service is running.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Service is healthy.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+  /generate:
+    post:
+      summary: Generate a shortened URL
+      description: Generates a short, manageable URL from a long URL. Requires authentication.
+      operationId: generateShortUrl
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - original_url
+              properties:
+                original_url:
+                  type: string
+                  format: uri
+                  description: The long URL to be shortened.
+                  example: "https://www.example.com/very/long/path/to/some/resource"
+                alias:
+                  type: string
+                  description: An optional custom alias for the shortened URL. Must be unique.
+                  example: "my-custom-link"
+      responses:
+        '200':
+          description: A shortened URL was successfully generated.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  shortened_url:
+                    type: string
+                    format: uri
+                    description: The new, shortened URL.
+                    example: "http://localhost:8080/api/v1/redirect/abcdef"
+        '400':
+          description: Invalid input, such as an invalid URL or an alias that is already in use.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Invalid URL provided."
+        '401':
+          description: Unauthorized request. The API key is missing or invalid.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Authentication failed."
+        '409':
+          description: The custom alias is already taken.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "The alias 'my-custom-link' is already taken."
+
+  /redirect/{short_code}:
+    get:
+      summary: Redirect to the original URL
+      description: |
+        Redirects a user from a short URL to the original, long URL. This endpoint
+        expects a **301 (Permanent)** or **302 (Found)** redirect to be issued by the server.
+        It should also handle cases where the short code does not exist.
+      operationId: redirectToOriginalUrl
+      parameters:
+        - name: short_code
+          in: path
+          description: The unique short code for the URL.
+          required: true
+          schema:
+            type: string
+            example: 'abcde'
+      responses:
+        '301':
+          description: Permanently redirects to the original URL.
+          headers:
+            Location:
+              description: The original long URL.
+              schema:
+                type: string
+                example: 'https://www.example.com/some/very/long/path/to/a/resource'
+        '302':
+          description: Temporarily redirects to the original URL.
+          headers:
+            Location:
+              description: The original long URL.
+              schema:
+                type: string
+                example: 'https://www.example.com/another/long/path'
+        '404':
+          description: Short code not found.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: 'Short code not found.'
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

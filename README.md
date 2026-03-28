@@ -157,7 +157,9 @@ Related dependency (see `pom.xml`):
 
 Start:
 ```bash
- docker pull cassandra:latest docker network create cassandra-net docker run --rm -d --name cassandra --hostname cassandra --network cassandra-net -p 9042:9042 cassandra
+ docker pull cassandra:latest 
+ docker network create cassandra-net 
+ docker run --rm -d --name cassandra --hostname cassandra --network cassandra-net -p 9042:9042 cassandra
 ```
 
 Stop:
